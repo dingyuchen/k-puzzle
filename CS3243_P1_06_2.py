@@ -94,8 +94,25 @@ class Base(object):
 
 # Wrapper class to inject cost function
 class Puzzle(Base):
+    def __init__(self, init_state, goal_state):
+        super(Puzzle, self).__init__(init_state, goal_state)
+        self.mapping = dict()
+        for i, row in enumerate(self.goal_state):
+            for j, v in enumerate(row):
+                self.mapping[v] = (i, j)
+
     def cost(self, prev_node, curr_state):
-        return 0
+        return prev_node.cost + 1 + self.manhattan(curr_state)
+
+    def manhattan(self, state):
+        sum = 0
+        for i, row in enumerate(state):
+            for j, v in enumerate(row):
+                x, y = self.mapping[v]
+                sum += abs(i - x) + abs(j - y)
+        return sum
+
+
 
 if __name__ == "__main__":
     # do NOT modify below

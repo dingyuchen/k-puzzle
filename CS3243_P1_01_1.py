@@ -1,4 +1,4 @@
-# CS3243 Introduction to Artificial Intelligence
+# CS3243 Test: No Visited Set
 # Project 1: k-Puzzle
 
 import os
@@ -37,7 +37,6 @@ class Base(object):
                         (1, 0): "UP",
                         (-1, 0): "DOWN"}
         self.n = len(init_state)
-        self.visited = set()
 
     def solve(self):
         # implement your search algorithm here
@@ -50,7 +49,6 @@ class Base(object):
 
         while pq:
             curr = heapq.heappop(pq)
-            self.visited.add(str(curr.state))
             if self.goal_test(curr.state):
                 return self.solution(curr)
             for move in self.actions:
@@ -62,8 +60,6 @@ class Base(object):
                     new_state = copy.deepcopy(curr.state)
                     new_state[x][y] = new_state[nx][ny] 
                     new_state[nx][ny] = 0
-                    if str(new_state) in self.visited:
-                        continue
                     new_node = Node(self.cost(curr, new_state), new_state, (nx, ny), curr, move)
                     heapq.heappush(pq, new_node)
 
@@ -94,8 +90,25 @@ class Base(object):
 
 # Wrapper class to inject cost function
 class Puzzle(Base):
+    def __init__(self, init_state, goal_state):
+        super(Puzzle, self).__init__(init_state, goal_state)
+        self.mapping = dict()
+        for i, row in enumerate(self.goal_state):
+            for j, v in enumerate(row):
+                self.mapping[v] = (i, j)
+
     def cost(self, prev_node, curr_state):
-        return 0
+        return prev_node.cost + 1 + self.manhattan(curr_state)
+
+    def manhattan(self, state):
+        sum = 0
+        for i, row in enumerate(state):
+            for j, v in enumerate(row):
+                x, y = self.mapping[v]
+                sum += abs(i - x) + abs(j - y)
+        return sum
+
+
 
 if __name__ == "__main__":
     # do NOT modify below
@@ -146,3 +159,4 @@ if __name__ == "__main__":
     with open(sys.argv[2], 'a') as f:
         for answer in ans:
             f.write(answer+'\n')
+
