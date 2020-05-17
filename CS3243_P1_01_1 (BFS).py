@@ -3,10 +3,7 @@
 
 import os
 import sys
-try:
-   import queue # python 3
-except ImportError:
-   import Queue as queue # python 2
+import Queue
 import functools
 import copy
 
@@ -39,7 +36,7 @@ class Base(object):
         # implement your search algorithm here
         if not self.isSolvable():
             return ["UNSOLVABLE"]
-        q = queue.Queue();
+        q = Queue.Queue();
         for i, row in enumerate(self.init_state):
             for j, v in enumerate(row):
                 if v == 0:
