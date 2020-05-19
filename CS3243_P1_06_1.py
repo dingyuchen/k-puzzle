@@ -3,7 +3,7 @@
 
 import os
 import sys
-import Queue
+import collections
 import functools
 import copy
 
@@ -36,15 +36,15 @@ class Base(object):
         # implement your search algorithm here
         if not self.isSolvable():
             return ["UNSOLVABLE"]
-        q = Queue.Queue();
+        q = collections.deque()
         for i, row in enumerate(self.init_state):
             for j, v in enumerate(row):
                 if v == 0:
                     self.pos = (i, j)
-        q.put(Node(0, self.init_state, self.pos, None, (0, 0)))
+        q.append(Node(0, self.init_state, self.pos, None, (0, 0)))
 
         while q:
-            curr = q.get()
+            curr = q.popleft()
             if self.goal_test(curr.state):
                 return self.solution(curr)
             for move in self.actions:
@@ -59,8 +59,9 @@ class Base(object):
                     if str(new_state) in self.visited:
                         continue
                     self.visited.add(str(new_state))
-                    new_node = Node(self.cost(curr, new_state), new_state, (nx, ny), curr, move)
-                    q.put(new_node)
+                    q.append(Node(self.cost(curr, new_state), new_state, (nx, ny), curr, move))
+
+        return ["UNSOLVABLE"]    
 
     # you may add more functions if you think is useful
     def is_valid(self, nx, ny):
@@ -84,21 +85,20 @@ class Base(object):
             curr = curr.prev
         return soln[::-1]
 
-
+    # adapted from https://www.cs.bham.ac.uk/~mdr/teaching/modules04/java2/TilesSolvability.html
     def isSolvable(self):
         lst = []
         zeroRow = -1
-        for row in range(len(self.init_state)):
-            for j in range(len(self.init_state[0])):
-                lst.append(self.init_state[row][j])
-                if j == 0:
+        for i, row in enumerate(self.init_state):
+            for j, v in enumerate(row):
+                lst.append(v)
+                if v == 0: 
                     zeroRow = row
         inv = 0
-        for i in range(len(lst)):
-            for j in range(i+1, len(lst)):
-                if lst[j] != 0 and lst[i] != 0 and lst[j] < lst[i]:
+        for i, t in enumerate(lst):
+            for j, v in enumerate(lst[i+1:]):
+                if v != 0 and t != 0 and v < t:
                     inv += 1
-
         width = len(self.init_state)
         return (width % 2 == 1 and inv % 2 == 0) or (width % 2 == 0 and 
                 (((self.n - zeroRow + 1) % 2 == 1) == (inv % 2 == 0)))
