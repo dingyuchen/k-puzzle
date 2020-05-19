@@ -3,16 +3,13 @@
 
 import os
 import sys
-import heapq
+import collections
 import functools
 import copy
 
 # Running script on your own - given code can be run with the command:
 # python file.py, ./path/to/init_state.txt ./output/output.txt
 
-# Helper class to contain state information and position of blank tile, etc.
-# Contains comparator for PriorityQueue
-@functools.total_ordering
 class Node(object):
     def __init__(self, cost, state, pos, prev, move):
         self.cost = cost
@@ -21,11 +18,6 @@ class Node(object):
         self.prev = prev
         self.move = move
 
-    def __lt__(self, other):
-        return self.cost < other.cost
-
-    def __eq__(self, other):
-        return self.cost == other.cost
 
 class Base(object):
     def __init__(self, init_state, goal_state):
@@ -38,19 +30,21 @@ class Base(object):
                         (-1, 0): "DOWN"}
         self.n = len(init_state)
         self.visited = set()
+        self.pos = (0, 0)
 
     def solve(self):
         # implement your search algorithm here
-        pq = []
+        if not self.is_solvable():
+            return ["UNSOLVABLE"]
+        q = collections.deque()
         for i, row in enumerate(self.init_state):
             for j, v in enumerate(row):
                 if v == 0:
                     self.pos = (i, j)
-        heapq.heappush(pq, Node(0, self.init_state, self.pos, None, (0, 0)))
+        q.append(Node(0, self.init_state, self.pos, None, (0, 0)))
 
-        while pq:
-            curr = heapq.heappop(pq)
-            self.visited.add(str(curr.state))
+        while q:
+            curr = q.popleft()
             if self.goal_test(curr.state):
                 return self.solution(curr)
             for move in self.actions:
@@ -64,10 +58,10 @@ class Base(object):
                     new_state[nx][ny] = 0
                     if str(new_state) in self.visited:
                         continue
-                    new_node = Node(self.cost(curr, new_state), new_state, (nx, ny), curr, move)
-                    heapq.heappush(pq, new_node)
+                    self.visited.add(str(new_state))
+                    q.append(Node(self.cost(curr, new_state), new_state, (nx, ny), curr, move))
 
-        return ["UNSOLVABLE"] 
+        return ["UNSOLVABLE"]    
 
     # you may add more functions if you think is useful
     def is_valid(self, nx, ny):
@@ -91,11 +85,29 @@ class Base(object):
             curr = curr.prev
         return soln[::-1]
 
+    # adapted from https://www.cs.bham.ac.uk/~mdr/teaching/modules04/java2/TilesSolvability.html
+    def is_solvable(self):
+        lst = []
+        zeroRow = -1
+        for i, row in enumerate(self.init_state):
+            for j, v in enumerate(row):
+                lst.append(v)
+                if v == 0: 
+                    zeroRow = i
+        inv = 0
+        for i, t in enumerate(lst):
+            for j, v in enumerate(lst[i+1:]):
+                if v != 0 and t != 0 and v < t:
+                    inv += 1
+        width = len(self.init_state)
+        return (width % 2 == 1 and inv % 2 == 0) or (width % 2 == 0 and 
+                (((self.n - zeroRow + 1) % 2 == 1) == (inv % 2 == 0)))
 
-# Wrapper class to inject cost function
+
 class Puzzle(Base):
     def cost(self, prev_node, curr_state):
-        return 0
+        return prev_node.cost + 1
+
 
 if __name__ == "__main__":
     # do NOT modify below
