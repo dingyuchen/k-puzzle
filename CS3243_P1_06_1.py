@@ -93,7 +93,7 @@ class Base(object):
             for j, v in enumerate(row):
                 lst.append(v)
                 if v == 0: 
-                    zeroRow = row
+                    zeroRow = i
         inv = 0
         for i, t in enumerate(lst):
             for j, v in enumerate(lst[i+1:]):
