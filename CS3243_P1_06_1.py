@@ -34,7 +34,7 @@ class Base(object):
 
     def solve(self):
         # implement your search algorithm here
-        if not self.isSolvable():
+        if not self.is_solvable():
             return ["UNSOLVABLE"]
         q = collections.deque()
         for i, row in enumerate(self.init_state):
@@ -86,7 +86,7 @@ class Base(object):
         return soln[::-1]
 
     # adapted from https://www.cs.bham.ac.uk/~mdr/teaching/modules04/java2/TilesSolvability.html
-    def isSolvable(self):
+    def is_solvable(self):
         lst = []
         zeroRow = -1
         for i, row in enumerate(self.init_state):
