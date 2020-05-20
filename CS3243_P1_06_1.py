@@ -44,7 +44,7 @@ class Base(object):
                 nx = x + dx
                 ny = y + dy
                 if self.is_valid(nx, ny):
-                    new_state = copy.deepcopy(curr[1])
+                    new_state = [[v for v in row] for row in curr[1]]
                     new_state[x][y] = new_state[nx][ny]
                     new_state[nx][ny] = 0
                     str_new_state = tuple(map(tuple, new_state))
