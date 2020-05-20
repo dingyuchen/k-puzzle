@@ -41,25 +41,26 @@ class Puzzle(object):
 
         while pq:
             curr = heapq.heappop(pq)
-            cost, state, pos, prev, move = curr
+            cost, state, pos, prev, p_move = curr
             self.visited.add(tuple(map(tuple, state)))
             if self.goal_test(state):
                 return self.solution(curr)
             for move in self.actions:
-                dx, dy = move
-                x, y = pos
-                nx = x + dx
-                ny = y + dy
-                if self.is_valid(nx, ny):
-                    # new_state = copy.deepcopy(curr.state)
-                    new_state = [[v for v in row] for row in state]
-                    new_state[x][y] = new_state[nx][ny]
-                    new_state[nx][ny] = 0
-                    if tuple(map(tuple, new_state)) in self.visited:
-                        continue
-                    new_node = (self.cost(curr, new_state),
-                                new_state, (nx, ny), curr, move)
-                    heapq.heappush(pq, new_node)
+                if move != p_move:
+                    dx, dy = move
+                    x, y = pos
+                    nx = x + dx
+                    ny = y + dy
+                    if self.is_valid(nx, ny):
+                        # new_state = copy.deepcopy(curr.state)
+                        new_state = [[v for v in row] for row in state]
+                        new_state[x][y] = new_state[nx][ny]
+                        new_state[nx][ny] = 0
+                        if tuple(map(tuple, new_state)) in self.visited:
+                            continue
+                        new_node = (self.cost(curr, new_state),
+                                    new_state, (nx, ny), curr, move)
+                        heapq.heappush(pq, new_node)
 
         return ["UNSOLVABLE"]
 
