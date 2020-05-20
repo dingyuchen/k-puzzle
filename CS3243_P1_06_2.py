@@ -36,33 +36,31 @@ class Puzzle(object):
         for i, row in enumerate(self.init_state):
             for j, v in enumerate(row):
                 if v == 0:
-                    pos = (i, j)
-        heapq.heappush(pq, (0, self.init_state, pos, None, (0, 0)))
+                    heapq.heappush(
+                        pq, (0, self.init_state, (i, j), None, (0, 0)))
 
         while pq:
             curr = heapq.heappop(pq)
-            cost, state, pos, prev, p_move = curr
+            cost, state, pos, _, p_move = curr
             self.visited.add(tuple(map(tuple, state)))
-            # self.visited.add(str(state))
             if self.goal_test(state):
                 return self.solution(curr)
             for move in self.actions:
-                if move != self.inverse(p_move):
-                    dx, dy = move
-                    x, y = pos
-                    nx = x + dx
-                    ny = y + dy
-                    if self.is_valid(nx, ny):
-                        # new_state = copy.deepcopy(curr.state)
-                        new_state = [[v for v in row] for row in state]
-                        new_state[x][y] = new_state[nx][ny]
-                        new_state[nx][ny] = 0
-                        if tuple(map(tuple, new_state)) in self.visited:
-                            # if str(new_state) in self.visited:
-                            continue
-                        new_node = (self.cost(curr, new_state),
-                                    new_state, (nx, ny), curr, move)
-                        heapq.heappush(pq, new_node)
+                if move == self.undo(p_move):
+                    continue
+                dx, dy = move
+                x, y = pos
+                nx = x + dx
+                ny = y + dy
+                if self.is_valid(nx, ny):
+                    new_state = [[v for v in row] for row in state]
+                    # swap values
+                    new_state[x][y], new_state[nx][ny] = new_state[nx][ny], 0
+                    if tuple(map(tuple, new_state)) in self.visited:
+                        continue
+                    new_node = (self.cost(cost, new_state),
+                                new_state, (nx, ny), curr, move)
+                    heapq.heappush(pq, new_node)
 
         return ["UNSOLVABLE"]
 
@@ -70,11 +68,11 @@ class Puzzle(object):
     def is_valid(self, nx, ny):
         return nx >= 0 and nx < self.n and ny < self.n and ny >= 0
 
-    def inverse(self, move):
+    def undo(self, move):
         return tuple([-v for v in move])
 
-    def cost(self, prev_node, curr_state):
-        return prev_node[0] + 1 + self.manhattan(curr_state)
+    def cost(self, prev_cost, curr_state):
+        return prev_cost + 1 + self.manhattan(curr_state)
 
     def manhattan(self, state):
         sum = 0
@@ -86,11 +84,7 @@ class Puzzle(object):
         return sum
 
     def goal_test(self, state):
-        for i, row in enumerate(state):
-            for j, v in enumerate(row):
-                if v != self.goal_state[i][j]:
-                    return False
-        return True
+        return state == self.goal_state
 
     def solution(self, node):
         soln = deque()
@@ -100,18 +94,17 @@ class Puzzle(object):
         return list(soln)
 
     # adapted from https://www.cs.bham.ac.uk/~mdr/teaching/modules04/java2/TilesSolvability.html
-
     def is_solvable(self):
         lst = []
         zeroRow = -1
         for i, row in enumerate(self.init_state):
-            for j, v in enumerate(row):
+            for _, v in enumerate(row):
                 lst.append(v)
                 if v == 0:
                     zeroRow = i
         inv = 0
         for i, t in enumerate(lst):
-            for j, v in enumerate(lst[i+1:]):
+            for _, v in enumerate(lst[i+1:]):
                 if v != 0 and t != 0 and v < t:
                     inv += 1
         width = len(self.init_state)
