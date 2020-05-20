@@ -43,10 +43,11 @@ class Puzzle(object):
             curr = heapq.heappop(pq)
             cost, state, pos, prev, p_move = curr
             self.visited.add(tuple(map(tuple, state)))
+            # self.visited.add(str(state))
             if self.goal_test(state):
                 return self.solution(curr)
             for move in self.actions:
-                if move != p_move:
+                if move != self.inverse(p_move):
                     dx, dy = move
                     x, y = pos
                     nx = x + dx
@@ -57,6 +58,7 @@ class Puzzle(object):
                         new_state[x][y] = new_state[nx][ny]
                         new_state[nx][ny] = 0
                         if tuple(map(tuple, new_state)) in self.visited:
+                            # if str(new_state) in self.visited:
                             continue
                         new_node = (self.cost(curr, new_state),
                                     new_state, (nx, ny), curr, move)
@@ -67,6 +69,9 @@ class Puzzle(object):
     # you may add more functions if you think is useful
     def is_valid(self, nx, ny):
         return nx >= 0 and nx < self.n and ny < self.n and ny >= 0
+
+    def inverse(self, move):
+        return tuple([-v for v in move])
 
     def cost(self, prev_node, curr_state):
         return prev_node[0] + 1 + self.manhattan(curr_state)
