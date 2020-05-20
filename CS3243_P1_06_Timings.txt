@@ -1,0 +1,7 @@
+Program 1-1
+Input 1: Failed, Number of moves: 1, Time: 2.88486480713e-05 seconds
+Input 2: Passed, Number of moves: 16, Time: 0.103976964951 seconds
+Input 3: Passed, Number of moves: 17, Time: 0.180500984192 seconds
+Input 4: Passed, Number of moves: 18, Time: 0.369834899902 seconds
+Input 5: Passed, Number of moves: 22, Time: 1.32342982292 seconds
+Input 6: Passed, Number of moves: 31, Time: 3.46747207642 seconds
