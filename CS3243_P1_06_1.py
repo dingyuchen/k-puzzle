@@ -85,12 +85,12 @@ class Base(object):
                     zeroRow = i
         inv = 0
         for i, t in enumerate(lst):
-            for j, v in enumerate(lst[i+1:]):
+            for v in lst[i+1:]:
                 if v != 0 and t != 0 and v < t:
                     inv += 1
         width = len(self.init_state)
         return (width % 2 == 1 and inv % 2 == 0) or (width % 2 == 0 and
-                                                     (((self.n - zeroRow + 1) % 2 == 1) == (inv % 2 == 0)))
+                                                     (((self.n - zeroRow) % 2 == 1) == (inv % 2 == 0)))
 
 
 class Puzzle(Base):
