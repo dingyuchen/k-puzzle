@@ -37,11 +37,11 @@ class Puzzle(object):
             for j, v in enumerate(row):
                 if v == 0:
                     pos = (i, j)
-        heapq.heappush(pq, (0, self.init_state, pos, None, (0, 0)))
+        heapq.heappush(pq, (0, 0, self.init_state, pos, None, (0, 0)))
 
         while pq:
             curr = heapq.heappop(pq)
-            cost, state, pos, prev, p_move = curr
+            _, p_cost, state, pos, _, p_move = curr
             self.visited.add(tuple(map(tuple, state)))
             # self.visited.add(str(state))
             if self.goal_test(state):
@@ -58,9 +58,8 @@ class Puzzle(object):
                         new_state[x][y] = new_state[nx][ny]
                         new_state[nx][ny] = 0
                         if tuple(map(tuple, new_state)) in self.visited:
-                            # if str(new_state) in self.visited:
                             continue
-                        new_node = (self.cost(curr, new_state),
+                        new_node = (self.cost(p_cost, new_state), p_cost + 1,
                                     new_state, (nx, ny), curr, move)
                         heapq.heappush(pq, new_node)
 
@@ -73,8 +72,8 @@ class Puzzle(object):
     def inverse(self, move):
         return tuple([-v for v in move])
 
-    def cost(self, prev_node, curr_state):
-        return prev_node[0] + 1 + self.manhattan(curr_state)
+    def cost(self, path_cost, curr_state):
+        return path_cost + 1 + self.manhattan(curr_state)
 
     def manhattan(self, state):
         sum = 0
@@ -94,9 +93,9 @@ class Puzzle(object):
 
     def solution(self, node):
         soln = deque()
-        while node[3] is not None:
-            soln.appendleft(self.actions[node[4]])
-            node = node[3]
+        while node[4] is not None:
+            soln.appendleft(self.actions[node[5]])
+            node = node[4]
         return list(soln)
 
     # adapted from https://www.cs.bham.ac.uk/~mdr/teaching/modules04/java2/TilesSolvability.html
@@ -105,13 +104,14 @@ class Puzzle(object):
         lst = []
         zeroRow = -1
         for i, row in enumerate(self.init_state):
-            for j, v in enumerate(row):
+            # for j, v in enumerate(row):
+            for v in row:
                 lst.append(v)
                 if v == 0:
                     zeroRow = i
         inv = 0
         for i, t in enumerate(lst):
-            for j, v in enumerate(lst[i+1:]):
+            for v in lst[i+1:]:
                 if v != 0 and t != 0 and v < t:
                     inv += 1
         width = len(self.init_state)
