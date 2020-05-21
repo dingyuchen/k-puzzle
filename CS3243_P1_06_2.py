@@ -40,11 +40,14 @@ class Puzzle(object):
             for j, v in enumerate(row):
                 if v == 0:
                     pos = (i, j)
-        heapq.heappush(pq, (0, self.init_state, pos, None, (0, 0)))
+        """
+        Node Tuple: (cost, moves, state, pos, prev_node, prev_move)
+        """
+        heapq.heappush(pq, (0, self.init_state, pos, None, (0, 0), 0))
 
         while 1:
             curr = heapq.heappop(pq)
-            cost, state, pos, prev, p_move = curr
+            cost, state, pos, prev, p_move, moves = curr
             self.visited.add(tuple(map(tuple, state)))
 
             for move in self.actions:
@@ -54,15 +57,13 @@ class Puzzle(object):
                     nx = x + dx
                     ny = y + dy
                     if self.is_valid(nx, ny):
-                        # new_state = copy.deepcopy(curr.state)
                         new_state = [[v for v in row] for row in state]
                         new_state[x][y] = new_state[nx][ny]
                         new_state[nx][ny] = 0
                         if tuple(map(tuple, new_state)) in self.visited:
-                            # if str(new_state) in self.visited:
                             continue
-                        new_node = (self.cost(curr, new_state),
-                                    new_state, (nx, ny), curr, move)
+                        new_node = (self.cost(new_state, moves),
+                                    new_state, (nx, ny), curr, move, moves + 1)
                         if self.row_test(new_state):
                             if len(new_state) > 2:
                                 return self.solution(new_node) + Puzzle(new_state[1:], self.goal_state[1:]).solve()
@@ -79,8 +80,8 @@ class Puzzle(object):
     def inverse(self, move):
         return tuple([-v for v in move])
 
-    def cost(self, prev_node, curr_state):
-        return prev_node[0] + 1 + self.manhattan(curr_state)
+    def cost(self, curr_state, moves):
+        return moves + 1 + self.manhattan(curr_state)
 
     def manhattan(self, state):
         sum = 0
