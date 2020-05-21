@@ -41,7 +41,7 @@ class Puzzle(object):
             if self.goal_test(state):
                 return self.solution(curr)
             for move in self.actions:
-                if move != self.inverse(p_move):
+                if move != self.undo(p_move):
                     dx, dy = move
                     x, y = pos
                     nx = x + dx
