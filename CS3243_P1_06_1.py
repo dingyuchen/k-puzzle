@@ -79,7 +79,7 @@ class Base(object):
         lst = []
         zeroRow = -1
         for i, row in enumerate(self.init_state):
-            for j, v in enumerate(row):
+            for v in row:
                 lst.append(v)
                 if v == 0:
                     zeroRow = i
