@@ -3,14 +3,10 @@
 
 import os
 import sys
-import heapq
-from collections import deque
+import collections
 
 # Running script on your own - given code can be run with the command:
 # python file.py, ./path/to/init_state.txt ./output/output.txt
-
-# Helper class to contain state information and position of blank tile, etc.
-# Contains comparator for PriorityQueue
 
 
 class Puzzle(object):
@@ -24,15 +20,13 @@ class Puzzle(object):
                         (-1, 0): "DOWN"}
         self.n = len(init_state)
         self.visited = set()
-        self.mapping = dict()
-        for i, row in enumerate(self.goal_state):
-            for j, v in enumerate(row):
-                self.mapping[v] = (i, j)
 
     def solve(self):
         # implement your search algorithm here
-        pq = []
-        pos = 0
+        if not self.is_solvable():
+            return ["UNSOLVABLE"]
+
+        q = collections.deque()
         for i, row in enumerate(self.init_state):
             for j, v in enumerate(row):
                 if v == 0:
@@ -69,7 +63,7 @@ class Puzzle(object):
     def is_valid(self, nx, ny):
         return nx >= 0 and nx < self.n and ny < self.n and ny >= 0
 
-    def inverse(self, move):
+    def undo(self, move):
         return tuple([-v for v in move])
 
     def cost(self, path_cost, curr_state):
@@ -85,11 +79,7 @@ class Puzzle(object):
         return sum
 
     def goal_test(self, state):
-        for i, row in enumerate(state):
-            for j, v in enumerate(row):
-                if v != self.goal_state[i][j]:
-                    return False
-        return True
+        return state == self.goal_state
 
     def solution(self, node):
         soln = deque()
@@ -99,7 +89,6 @@ class Puzzle(object):
         return list(soln)
 
     # adapted from https://www.cs.bham.ac.uk/~mdr/teaching/modules04/java2/TilesSolvability.html
-
     def is_solvable(self):
         lst = []
         zeroRow = -1

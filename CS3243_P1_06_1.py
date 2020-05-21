@@ -4,13 +4,12 @@
 import os
 import sys
 import collections
-import copy
 
 # Running script on your own - given code can be run with the command:
 # python file.py, ./path/to/init_state.txt ./output/output.txt
 
 
-class Base(object):
+class Puzzle(object):
     def __init__(self, init_state, goal_state):
         # you may add more attributes if you think is useful
         self.init_state = init_state
@@ -21,38 +20,42 @@ class Base(object):
                         (-1, 0): "DOWN"}
         self.n = len(init_state)
         self.visited = set()
-        self.pos = (0, 0)
 
     def solve(self):
         # implement your search algorithm here
         if not self.is_solvable():
             return ["UNSOLVABLE"]
+
         q = collections.deque()
         for i, row in enumerate(self.init_state):
             for j, v in enumerate(row):
                 if v == 0:
-                    self.pos = (i, j)
-        q.append((0, self.init_state, self.pos, None, (0, 0)))
+                    q.append((0, self.init_state, (i, j), None, (0, 0)))
 
         while q:
             curr = q.popleft()
-            if self.goal_test(curr[1]):
-                return self.solution(curr)
+            cost, state, pos, _, p_move = curr
             for move in self.actions:
+                if move == self.undo(p_move):
+                    continue
                 dx, dy = move
-                x, y = curr[2]
+                x, y = pos
                 nx = x + dx
                 ny = y + dy
                 if self.is_valid(nx, ny):
-                    new_state = [[v for v in row] for row in curr[1]]
-                    new_state[x][y] = new_state[nx][ny]
-                    new_state[nx][ny] = 0
-                    str_new_state = tuple(map(tuple, new_state))
-                    if str_new_state in self.visited:
+                    new_state = [[v for v in row] for row in state]
+                    new_state[x][y], new_state[nx][ny] = new_state[nx][ny], 0
+                    new_node = (self.cost(cost, new_state),
+                                new_state, (nx, ny), curr, move)
+
+                    if self.goal_test(new_state):
+                        return self.solution(new_node)
+
+                    state_hash = tuple(map(tuple, new_state))
+                    if state_hash in self.visited:
                         continue
-                    self.visited.add(str_new_state)
-                    q.append((self.cost(curr, new_state),
-                              new_state, (nx, ny), curr, move))
+                    self.visited.add(state_hash)
+                    q.append(new_node)
 
         return ["UNSOLVABLE"]
 
@@ -60,8 +63,11 @@ class Base(object):
     def is_valid(self, nx, ny):
         return nx >= 0 and nx < self.n and ny < self.n and ny >= 0
 
-    def cost(self, prev_node, curr_state):
-        return prev_node.cost + 1
+    def undo(self, move):
+        return tuple([-v for v in move])
+
+    def cost(self, prev_cost, curr_state):
+        return prev_cost + 1
 
     def goal_test(self, state):
         return state == self.goal_state
@@ -79,23 +85,18 @@ class Base(object):
         lst = []
         zeroRow = -1
         for i, row in enumerate(self.init_state):
-            for j, v in enumerate(row):
+            for _, v in enumerate(row):
                 lst.append(v)
                 if v == 0:
                     zeroRow = i
         inv = 0
         for i, t in enumerate(lst):
-            for j, v in enumerate(lst[i+1:]):
+            for _, v in enumerate(lst[i+1:]):
                 if v != 0 and t != 0 and v < t:
                     inv += 1
         width = len(self.init_state)
         return (width % 2 == 1 and inv % 2 == 0) or (width % 2 == 0 and
                                                      (((self.n - zeroRow + 1) % 2 == 1) == (inv % 2 == 0)))
-
-
-class Puzzle(Base):
-    def cost(self, prev_node, curr_state):
-        return prev_node[0] + 1
 
 
 if __name__ == "__main__":

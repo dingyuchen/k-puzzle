@@ -70,7 +70,7 @@ class Puzzle(object):
     def is_valid(self, nx, ny):
         return 0 <= nx < self.n and 0 <= ny < self.n
 
-    def inverse(self, move):
+    def undo(self, move):
         return tuple([-v for v in move])
 
     def cost(self, path_cost, curr_state):
@@ -96,7 +96,6 @@ class Puzzle(object):
         return list(soln)
 
     # adapted from https://www.cs.bham.ac.uk/~mdr/teaching/modules04/java2/TilesSolvability.html
-
     def is_solvable(self):
         lst = []
         zeroRow = -1
