@@ -5,3 +5,11 @@ Input 3: Passed, Number of moves: 17, Time: 0.180500984192 seconds
 Input 4: Passed, Number of moves: 18, Time: 0.369834899902 seconds
 Input 5: Passed, Number of moves: 22, Time: 1.32342982292 seconds
 Input 6: Passed, Number of moves: 31, Time: 3.46747207642 seconds
+
+Program 06-2
+Input 1: Passed, Number of moves: 20, Time: 0.00129818916321 seconds
+Input 2: Passed, Number of moves: 26, Time: 0.0975301265717 seconds
+Input 3: Passed, Number of moves: 30, Time: 0.0300071239471 seconds
+Input 4: Passed, Number of moves: 28, Time: 0.250133991241 seconds
+Input 5: Passed, Number of moves: 24, Time: 0.0110778808594 seconds
+Input 6: Passed, Number of moves: 29, Time: 0.306117773056 seconds
