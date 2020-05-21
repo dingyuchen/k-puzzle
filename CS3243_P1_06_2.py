@@ -22,12 +22,15 @@ class Puzzle(object):
                         (0, 1): "LEFT",
                         (1, 0): "UP",
                         (-1, 0): "DOWN"}
-        self.n = len(init_state)
+        self.nrow = len(init_state)
+        self.ncol = len(init_state[0])
         self.visited = set()
         self.mapping = dict()
         for i, row in enumerate(self.goal_state):
             for j, v in enumerate(row):
                 self.mapping[v] = (i, j)
+
+        #(row, column)
 
     def solve(self):
         # implement your search algorithm here
@@ -39,14 +42,13 @@ class Puzzle(object):
                     pos = (i, j)
         heapq.heappush(pq, (0, self.init_state, pos, None, (0, 0)))
 
-        while pq:
+        while 1:
             curr = heapq.heappop(pq)
             cost, state, pos, prev, p_move = curr
             self.visited.add(tuple(map(tuple, state)))
-            if self.goal_test(state):
-                return self.solution(curr)
+
             for move in self.actions:
-                if move != p_move:
+                if move != (-p_move[0], -p_move[1]):
                     dx, dy = move
                     x, y = pos
                     nx = x + dx
@@ -60,13 +62,18 @@ class Puzzle(object):
                             continue
                         new_node = (self.cost(curr, new_state),
                                     new_state, (nx, ny), curr, move)
+                        if self.row_test(new_state):
+                            if len(new_state) > 2:
+                                return self.solution(new_node) + Puzzle(new_state[1:], self.goal_state[1:]).solve()
+                            elif self.goal_test(new_state):
+                                return self.solution(new_node) 
                         heapq.heappush(pq, new_node)
 
         return ["UNSOLVABLE"]
 
     # you may add more functions if you think is useful
     def is_valid(self, nx, ny):
-        return nx >= 0 and nx < self.n and ny < self.n and ny >= 0
+        return 0 <= nx < self.nrow and 0 <= ny < self.ncol
 
     def cost(self, prev_node, curr_state):
         return prev_node[0] + 1 + self.manhattan(curr_state)
@@ -79,13 +86,12 @@ class Puzzle(object):
                     x, y = self.mapping[v]
                     sum += abs(i - x) + abs(j - y)
         return sum
-
+    
+    def row_test(self, state):
+        return self.goal_state[0] == state[0]
+    
     def goal_test(self, state):
-        for i, row in enumerate(state):
-            for j, v in enumerate(row):
-                if v != self.goal_state[i][j]:
-                    return False
-        return True
+        return self.goal_state == state
 
     def solution(self, node):
         soln = deque()
@@ -112,7 +118,6 @@ class Puzzle(object):
         width = len(self.init_state)
         return (width % 2 == 1 and inv % 2 == 0) or (width % 2 == 0 and
                                                      (((self.n - zeroRow + 1) % 2 == 1) == (inv % 2 == 0)))
-
 
 if __name__ == "__main__":
     # do NOT modify below
