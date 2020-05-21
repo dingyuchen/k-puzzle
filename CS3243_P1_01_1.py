@@ -43,7 +43,7 @@ class Puzzle(object):
             curr = heapq.heappop(pq)
             cost, state, pos, prev, p_move = curr
             self.visited.add(tuple(map(tuple, state)))
-            self.visited.add(str(state))
+            # self.visited.add(str(state))
             if self.goal_test(state):
                 return self.solution(curr)
             for move in self.actions:

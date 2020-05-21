@@ -48,7 +48,7 @@ class Puzzle(object):
             self.visited.add(tuple(map(tuple, state)))
 
             for move in self.actions:
-                if move != (-p_move[0], -p_move[1]):
+                if move != self.inverse(p_move):
                     dx, dy = move
                     x, y = pos
                     nx = x + dx
@@ -59,6 +59,7 @@ class Puzzle(object):
                         new_state[x][y] = new_state[nx][ny]
                         new_state[nx][ny] = 0
                         if tuple(map(tuple, new_state)) in self.visited:
+                            # if str(new_state) in self.visited:
                             continue
                         new_node = (self.cost(curr, new_state),
                                     new_state, (nx, ny), curr, move)
@@ -66,7 +67,7 @@ class Puzzle(object):
                             if len(new_state) > 2:
                                 return self.solution(new_node) + Puzzle(new_state[1:], self.goal_state[1:]).solve()
                             elif self.goal_test(new_state):
-                                return self.solution(new_node) 
+                                return self.solution(new_node)
                         heapq.heappush(pq, new_node)
 
         return ["UNSOLVABLE"]
@@ -74,6 +75,9 @@ class Puzzle(object):
     # you may add more functions if you think is useful
     def is_valid(self, nx, ny):
         return 0 <= nx < self.nrow and 0 <= ny < self.ncol
+
+    def inverse(self, move):
+        return tuple([-v for v in move])
 
     def cost(self, prev_node, curr_state):
         return prev_node[0] + 1 + self.manhattan(curr_state)
@@ -86,10 +90,10 @@ class Puzzle(object):
                     x, y = self.mapping[v]
                     sum += abs(i - x) + abs(j - y)
         return sum
-    
+
     def row_test(self, state):
         return self.goal_state[0] == state[0]
-    
+
     def goal_test(self, state):
         return self.goal_state == state
 
@@ -118,6 +122,7 @@ class Puzzle(object):
         width = len(self.init_state)
         return (width % 2 == 1 and inv % 2 == 0) or (width % 2 == 0 and
                                                      (((self.n - zeroRow + 1) % 2 == 1) == (inv % 2 == 0)))
+
 
 if __name__ == "__main__":
     # do NOT modify below
