@@ -1,9 +1,11 @@
 # k-puzzle
+
 CS3243 Project 1: k-Puzzle
 
 ## Project Requirements
-- [ ] Implementation of **BFS or UCS** algorithm
-- [ ] Implementation of **A-star** with Manhattan distance heuristic
+
+- [x] Implementation of **BFS or UCS** algorithm
+- [x] Implementation of **A-star** with Manhattan distance heuristic
 - [ ] Implementation of **A-star** with one other heuristic that dominates the
       Manhattan heuristic
 - [ ] Comments to explain why the heuristic dominates
@@ -11,4 +13,5 @@ CS3243 Project 1: k-Puzzle
       on its respective public test cases
 
 ## Workflow
-We will be using the [feature branch workflow](https://www.atlassian.com/git/tutorials/comparing-workflows/feature-branch-workflow). 
+
+We will be using the [feature branch workflow](https://www.atlassian.com/git/tutorials/comparing-workflows/feature-branch-workflow).
