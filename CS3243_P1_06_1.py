@@ -29,14 +29,16 @@ class Puzzle(object):
 
         q = collections.deque()
         assert self.pos[0] >= 0 and self.pos[1] >= 0
-        q.append((0, self.init_state, self.pos, None, (0, 0)))
+        q.append((self.init_state, self.pos, None, (0, 0),
+                  tuple(map(tuple, self.init_state))))
 
         while q:
             curr = q.popleft()
-            cost, state, pos, _, p_move = curr
+            state, pos, _, p_move, state_hash = curr
             for move in self.actions:
                 if move == self.undo(p_move):
                     continue
+
                 dx, dy = move
                 x, y = pos
                 nx = x + dx
@@ -44,15 +46,14 @@ class Puzzle(object):
                 if self.is_valid(nx, ny):
                     new_state = [[v for v in row] for row in state]
                     new_state[x][y], new_state[nx][ny] = new_state[nx][ny], 0
-                    new_node = (self.cost(cost, new_state),
-                                new_state, (nx, ny), curr, move)
+                    state_hash = tuple(map(tuple, new_state))
+                    new_node = (new_state, (nx, ny), curr, move, state_hash)
 
                     if self.goal_test(new_state):
                         return self.solution(new_node)
-
-                    state_hash = tuple(map(tuple, new_state))
                     if state_hash in self.visited:
                         continue
+
                     self.visited.add(state_hash)
                     q.append(new_node)
 
@@ -65,18 +66,15 @@ class Puzzle(object):
     def undo(self, move):
         return tuple([-v for v in move])
 
-    def cost(self, prev_cost, curr_state):
-        return prev_cost + 1
-
     def goal_test(self, state):
         return state == self.goal_state
 
     def solution(self, node):
         soln = []
         curr = node
-        while curr[3] is not None:
-            soln.append(self.actions[curr[4]])
-            curr = curr[3]
+        while curr[2] is not None:
+            soln.append(self.actions[curr[3]])
+            curr = curr[2]
         return soln[::-1]
 
     # adapted from https://www.cs.bham.ac.uk/~mdr/teaching/modules04/java2/TilesSolvability.html
