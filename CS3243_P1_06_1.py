@@ -18,6 +18,7 @@ class Puzzle(object):
                         (0, 1): "LEFT",
                         (1, 0): "UP",
                         (-1, 0): "DOWN"}
+        self.pos = (-1, -1)
         self.n = len(init_state)
         self.visited = set()
 
@@ -27,10 +28,8 @@ class Puzzle(object):
             return ["UNSOLVABLE"]
 
         q = collections.deque()
-        for i, row in enumerate(self.init_state):
-            for j, v in enumerate(row):
-                if v == 0:
-                    q.append((0, self.init_state, (i, j), None, (0, 0)))
+        assert self.pos[0] >= 0 and self.pos[1] >= 0
+        q.append((0, self.init_state, self.pos, None, (0, 0)))
 
         while q:
             curr = q.popleft()
@@ -85,10 +84,11 @@ class Puzzle(object):
         lst = []
         zeroRow = -1
         for i, row in enumerate(self.init_state):
-            for v in row:
+            for j, v in enumerate(row):
                 lst.append(v)
                 if v == 0:
                     zeroRow = i
+                    self.pos = (i, j)
         inv = 0
         for i, t in enumerate(lst):
             for v in lst[i+1:]:
