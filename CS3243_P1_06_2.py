@@ -24,6 +24,7 @@ class Puzzle(object):
                         (-1, 0): "DOWN"}
         self.n = len(init_state)
         self.visited = set()
+        self.pos = (-1, -1)
         self.mapping = dict()
         for i, row in enumerate(self.goal_state):
             for j, v in enumerate(row):
@@ -34,13 +35,9 @@ class Puzzle(object):
         if not self.is_solvable():
             return ["UNSOLVABLE"]
         pq = []
-        pos = 0
-        for i, row in enumerate(self.init_state):
-            for j, v in enumerate(row):
-                if v == 0:
-                    pos = (i, j)
+        assert self.pos[0] >= 0 and self.pos[1] >= 0
         # Node (f(n), path cost, state, 0-position, parent, previous move)
-        heapq.heappush(pq, (0, 0, self.init_state, pos, None, (0, 0)))
+        heapq.heappush(pq, (0, 0, self.init_state, self.pos, None, (0, 0)))
 
         while pq:
             curr = heapq.heappop(pq)
@@ -102,10 +99,11 @@ class Puzzle(object):
         lst = []
         zeroRow = -1
         for i, row in enumerate(self.init_state):
-            for v in row:
+            for j, v in enumerate(row):
                 lst.append(v)
                 if v == 0:
                     zeroRow = i
+                    self.pos = (i, j)
         inv = 0
         for i, t in enumerate(lst):
             for v in lst[i+1:]:
