@@ -24,6 +24,7 @@ class Puzzle(object):
                         (-1, 0): "DOWN"}
         self.n = len(init_state)
         self.visited = set()
+        self.pos = (-1, -1)
         self.mapping = dict()
         for i, row in enumerate(self.goal_state):
             for j, v in enumerate(row):
@@ -34,37 +35,38 @@ class Puzzle(object):
         if not self.is_solvable():
             return ["UNSOLVABLE"]
         pq = []
-        pos = 0
-        for i, row in enumerate(self.init_state):
-            for j, v in enumerate(row):
-                if v == 0:
-                    pos = (i, j)
+        assert self.pos[0] >= 0 and self.pos[1] >= 0
         # Node (f(n), path cost, state, 0-position, parent, previous move)
-        heapq.heappush(pq, (0, 0, self.init_state, pos, None, (0, 0)))
+        heapq.heappush(pq, (0, 0, self.init_state, self.pos, None,
+                            (0, 0), tuple(map(tuple, self.init_state))))
 
         while pq:
             curr = heapq.heappop(pq)
-            _, p_cost, state, pos, _, p_move = curr
-            self.visited.add(tuple(map(tuple, state)))
-            # self.visited.add(str(state))
+            _, p_cost, state, pos, _, p_move, state_hash = curr
+            self.visited.add(state_hash)
             if self.goal_test(state):
                 return self.solution(curr)
             for move in self.actions:
-                if move != self.undo(p_move):
-                    dx, dy = move
-                    x, y = pos
-                    nx = x + dx
-                    ny = y + dy
-                    if self.is_valid(nx, ny):
-                        # new_state = copy.deepcopy(curr.state)
-                        new_state = [[v for v in row] for row in state]
-                        new_state[x][y] = new_state[nx][ny]
-                        new_state[nx][ny] = 0
-                        if tuple(map(tuple, new_state)) in self.visited:
-                            continue
-                        new_node = (self.cost(p_cost, new_state), p_cost + 1,
-                                    new_state, (nx, ny), curr, move)
-                        heapq.heappush(pq, new_node)
+                if move == self.undo(p_move):
+                    continue
+
+                dx, dy = move
+                x, y = pos
+                nx = x + dx
+                ny = y + dy
+
+                if self.is_valid(nx, ny):
+                    new_state = [[v for v in row] for row in state]
+                    new_state[x][y] = new_state[nx][ny]
+                    new_state[nx][ny] = 0
+                    state_hash = tuple(map(tuple, new_state))
+
+                    if state_hash in self.visited:
+                        continue
+
+                    new_node = (self.cost(p_cost, new_state), p_cost + 1,
+                                new_state, (nx, ny), curr, move, state_hash)
+                    heapq.heappush(pq, new_node)
 
         return ["UNSOLVABLE"]
 
@@ -102,10 +104,11 @@ class Puzzle(object):
         lst = []
         zeroRow = -1
         for i, row in enumerate(self.init_state):
-            for v in row:
+            for j, v in enumerate(row):
                 lst.append(v)
                 if v == 0:
                     zeroRow = i
+                    self.pos = (i, j)
         inv = 0
         for i, t in enumerate(lst):
             for v in lst[i+1:]:
