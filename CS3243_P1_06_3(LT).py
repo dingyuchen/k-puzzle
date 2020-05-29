@@ -162,6 +162,8 @@ class Puzzle(object):
         before returning to their goal positions. This adds 2 moves to the heuristic.
         However, there would be double counting if either of them are involved in the linear conflict of their respective
         rows or columns.
+        For simplicity of implementation we choose to ignore this heuristic as long as there is a linear conflict in the 
+        row or column that a or b is supposed to be in.
         """
         last_r = self.n ** 2 - 1
         last_c = last_r - self.n + 1
