@@ -12,8 +12,8 @@ from collections import deque
 
 class Node(object):
     """
-    Helper class to contain various information of node,
-    including breakdown of heuristic calculation to reduce recomputation
+    Helper class to contain various information of node, 
+    including breakdown of heuristic calculation to reduce recomputation 
     """
 
     def __init__(self, state, zero_pos, hmap, immut=None, path_cost=0, parent=None, prev_move=(0, 0)):
@@ -97,8 +97,7 @@ class Puzzle(object):
 
     def cost(self, node):
         lc = sum(node.hmap["row"]) + sum(node.hmap["col"])
-        last_tile = self.last_tile(node)
-        return node.path_cost + 1 + node.hmap["md"] + 2 * lc + last_tile
+        return node.path_cost + 1 + node.hmap["md"] + 2 * lc
 
     def update_hmap(self, parent, move, child_state):
         dx, dy = move
@@ -154,37 +153,12 @@ class Puzzle(object):
         return [[state[j][i]
                  for j in range(width)] for i in range(len(state))]
 
-    def last_tile(self, node):
-        """
-        The last move of the tile must be some tile adjacent to the blank tile in the goal state.
-        Let's say that these tiles are a and b, then if a is not in the last column and b is not in the last row,
-        then their manhattan distance will not reflect the fact that one of them needs to overshoot,
-        before returning to their goal positions. This adds 2 moves to the heuristic.
-        However, there would be double counting if either of them are involved in the linear conflict of their respective
-        rows or columns.
-        """
-        last_r = self.n ** 2 - 1
-        last_c = last_r - self.n + 1
-        hr, hc = 0, 0
-        if last_c not in node.state[self.n - 1]:
-            if last_c in [row[self.n - 1] for row in node.state] and node.hmap['row'][self.n - 1] > 0:
-                return 0
-            else:
-                hr = 2
-        if last_r not in [row[self.n - 1] for row in node.state]:
-            if last_r in node.state[self.n - 1] and node.hmap['col'][self.n - 1] > 0:
-                return 0
-            else:
-                hc = 2
-        return max(hr, hc)
-
+    # Original paper found here:
+    # https://cse.sc.edu/~mgv/csce580sp15/gradPres/HanssonMayerYung1992.pdf
     def line_conflict(self, i, line, dest):
         """
         If 2 tiles are both in their respective goal rows/columns but eventually require to swap places with one another to reach their goal positions, then these 2 tiles are said to be in linear conflict.
         We know that 1 tile must definitely move out of the row in order to let the other tile pass, which adds 2 extra moves to the manhattan distance heuristic, while still being admissble.
-
-        Original paper found here:
-        https://cse.sc.edu/~mgv/csce580sp15/gradPres/HanssonMayerYung1992.pdf
         """
         conflicts = 0
         conflict_graph = {}
